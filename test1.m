@@ -28,7 +28,7 @@ Tf1=Tc; Tf2=25;
 % Tw1;Tw2; 
 h1=200; % 水->陶瓷
 h2=3; % 陶瓷->空气
-% [h1,h2]=meshgrid(200:800/100:1000,3:7/100:10);
+% [h1,h2]=meshgrid(200:800/30:1000,3:7/30:10);
 h3=h1; % 水->空气
 Lambda1=1.3; % 陶瓷
 Lambda2=0.63; % 水
@@ -48,7 +48,8 @@ phi=phi1+phi2;
 % dQH==phi;
 S1=phi./(C*rho*(Th-Tf1));
 S1*1000;
-% mesh(h1,h2,S1*1000);
+% surf(h1,h2,S1*1000);
+% hold on;
 
 %% Compute 2（水池中加入人）
 % 假定人是一个等温体，与水发生对流换热
@@ -59,8 +60,11 @@ phi=phi1+phi2+phi3;
 % dQH==phi;
 S2=phi./(C*rho*(Th-Tf1));
 S2*1000;
-% mesh(h1,h2,S2*1000);
-
+% surf(h1,h2,S2*1000);
+% title('h1/h2 changed effect on S1/S2')
+% xlabel('h1/ W (m^2 * K)')
+% ylabel('h2/ W (m^2 * K)')
+% zlabel('S1/S2 / L')
 %% Compute 3（讨论在此模型下tub/person的shape/volume/temperature对模型的影响）
 % 计算两种散热面的热流密度
 q1=1./(1./h1+delta./Lambda1+1./h2)*(Tf1-Tf2);
@@ -118,14 +122,14 @@ S1=phi./(C*rho*(Th-Tf1));
 phi=phi1+phi2+phi3;
 % dQH==phi;
 S2=phi./(C*rho*(Th-Tf1));
-plot(h3,S1*1000,'r','LineWidth',2');
-hold on;
-plot(h3,S2*1000,'r','LineWidth',2');
-title('h3 changed effect on S1/S2')
-xlabel('h3/ W (m^2 * K)')
-ylabel('S1/S2 / L')
-text(80,0.00005*1000,' Effect on S2 \rightarrow');
-text(120,0.00002*1000,'\leftarrow Effect on S1');
+% plot(h3,S1*1000,'r','LineWidth',2');
+% hold on;
+% plot(h3,S2*1000,'r','LineWidth',2');
+% title('h3 changed effect on S1/S2')
+% xlabel('h3/ W (m^2 * K)')
+% ylabel('S1/S2 / L')
+% text(80,0.00005*1000,' Effect on S2 \rightarrow');
+% text(120,0.00002*1000,'\leftarrow Effect on S1');
 
 
 
