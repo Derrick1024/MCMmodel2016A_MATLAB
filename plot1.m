@@ -66,10 +66,10 @@ q3=h1*(Tf1-Tm);
 q2/q1;   % 这个值反应了两种面的散热能力对比，由结果可知水面的散热能力大约是陶瓷面的380倍
 q3/q1;   % 这个值反应了两种面的散热能力对比，由结果可知人的散热能力大约是陶瓷面的18倍
 
-plot(Tm,S2,'r','LineWidth',2')
+plot(Tm,S2*1000,'r','LineWidth',2')
 title('Effect of body temperature on S2')
 xlabel('Tm / \circC')
-ylabel('S2 / m^3')
+ylabel('S2 / L')
 
 
 

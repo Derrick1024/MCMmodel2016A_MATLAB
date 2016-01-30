@@ -28,7 +28,8 @@ Tf1=Tc; Tf2=25;
 % Tw1;Tw2; 
 h1=200; % 水->陶瓷
 h2=3; % 陶瓷->空气
-h3=1000; % 水->空气
+% [h1,h2]=meshgrid(200:800/100:1000,3:7/100:10);
+h3=h1; % 水->空气
 Lambda1=1.3; % 陶瓷
 Lambda2=0.63; % 水
 C=4200;
@@ -41,30 +42,32 @@ A1=2*a*c+a*b+2*b*c;
 % 空气面面积
 A2=a*b;
 % 热流量
-phi1=1/(1/h1+delta/Lambda1+1/h2)*A1*(Tf1-Tf2);
+phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tf2);
 phi2=h3*A2*(Tf1-Tf2);
 phi=phi1+phi2;
 % dQH==phi;
-S1=phi/(C*rho*(Th-Tf1));
-S1*1000
+S1=phi./(C*rho*(Th-Tf1));
+S1*1000;
+% mesh(h1,h2,S1*1000);
 
 %% Compute 2（水池中加入人）
 % 假定人是一个等温体，与水发生对流换热
-phi1=1/(1/h1+delta/Lambda1+1/h2)*A1*(Tf1-Tf2);
-phi2=h3*A2*(Tf1-Tf2);
+% phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tf2);
+% phi2=h3*A2*(Tf1-Tf2);
 phi3=h1*A3*(Tf1-Tm);
 phi=phi1+phi2+phi3;
 % dQH==phi;
-S2=phi/(C*rho*(Th-Tf1));
-S2*1000
+S2=phi./(C*rho*(Th-Tf1));
+S2*1000;
+% mesh(h1,h2,S2*1000);
 
 %% Compute 3（讨论在此模型下tub/person的shape/volume/temperature对模型的影响）
 % 计算两种散热面的热流密度
-q1=1/(1/h1+delta/Lambda1+1/h2)*(Tf1-Tf2);
+q1=1./(1./h1+delta./Lambda1+1./h2)*(Tf1-Tf2);
 q2=h3*(Tf1-Tf2);
 q3=h1*(Tf1-Tm);
-q2/q1   % 这个值反应了两种面的散热能力对比，由结果可知水面的散热能力大约是陶瓷面的380倍
-q3/q1   % 这个值反应了两种面的散热能力对比，由结果可知人的散热能力大约是陶瓷面的18倍
+q2/q1;   % 这个值反应了两种面的散热能力对比，由结果可知水面的散热能力大约是陶瓷面的77倍
+q3/q1;   % 这个值反应了两种面的散热能力对比，由结果可知人的散热能力大约是陶瓷面的18倍
 %  <在此模型下>
 % （1）对tub而言，由shape/volume带来的对模型结果的变化可以归结为与空气/陶瓷面分别接触的表面积的大小的影响
 % 例如保持其shape不变（长方体）而改变其volume（a*b*c变化），亦或保持其volume不变（a*b*c不变）而改变其shape
@@ -73,14 +76,56 @@ q3/q1   % 这个值反应了两种面的散热能力对比，由结果可知人的散热能力大约是陶瓷面的
 % （2）对person而言，对原始模型的影响仅仅是带来了phi3的一项热流量，而这一项也仅与人的表面积有关
 % 因此由shape/volume带来的对模型结果的变化可以归结为人的表面积的大小的影响，结论与（1）类似
 % 而temperature（Tm）的变化使得q3发生了改变。此时人与水接触面的散热能力发生了变化，其结果会发生确定的改变
-% 接下里会在<plot1.m>中具体讨论这些变化
+% 接下里会在<test2.m>中具体讨论这些变化
 
+%% compute 4(person's motion)
+% 人的运动会加快水的流动，使得水变为了强制对流，这时对流传热系数h1、h3会增大
+% 根据增程度的不同，可以得到以下图像
+h1=200:0.1:1000;
+h3=h1;
+phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tf2);
+phi2=h3*A2*(Tf1-Tf2);
+phi=phi1+phi2;
+% dQH==phi;
+S1=phi./(C*rho*(Th-Tf1));
+S1*1000;
+phi3=h1*A3*(Tf1-Tm);
+phi=phi1+phi2+phi3;
+% dQH==phi;
+S2=phi./(C*rho*(Th-Tf1));
+S2*1000;
+% plot(h1,S1*1000,'r','LineWidth',2');
+% hold on;
+% plot(h1,S2*1000,'r','LineWidth',2');
+% title('Effect on S1/S2')
+% xlabel('h1/ W (m^2 * K)')
+% ylabel('S1/S2 / L')
+% text(350,0.00018*1000,' Effect on S2 \rightarrow');
+% text(600,0.0001*1000,'\leftarrow Effect on S1');
 
-
-
-
-
-
+%% compute 5（bubble）
+% 加入bubble以后，浴盆的表面被覆盖，水与空气的对流换热被阻隔，既h3减小，
+% 结果就是流量S2减小
+h1=200; % 水->陶瓷
+h2=3; % 陶瓷->空气
+h3=3:0.1:200; % 水->空气
+phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tf2);
+phi2=h3*A2*(Tf1-Tf2);
+phi3=h1*A3*(Tf1-Tm);
+phi=phi1+phi2;
+% dQH==phi;
+S1=phi./(C*rho*(Th-Tf1));
+phi=phi1+phi2+phi3;
+% dQH==phi;
+S2=phi./(C*rho*(Th-Tf1));
+plot(h3,S1*1000,'r','LineWidth',2');
+hold on;
+plot(h3,S2*1000,'r','LineWidth',2');
+title('h3 changed effect on S1/S2')
+xlabel('h3/ W (m^2 * K)')
+ylabel('S1/S2 / L')
+text(80,0.00005*1000,' Effect on S2 \rightarrow');
+text(120,0.00002*1000,'\leftarrow Effect on S1');
 
 
 
