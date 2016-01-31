@@ -14,47 +14,52 @@
 %             model-2 ->S2（单位L）
 % 水的比热容C
 % 水的密度rho
-
-clear;
+clear
 %% Const Define
 a=1.2;b=0.7;c=0.4;delta=0.06;
 Vw=a*b*c; 
-% rm=; hm=; 
-Vm=0.059; % 体重65KG，密度取1.1*10^3
-A3=1.7161;% 体表面积（m2）= 0.0061×170（cm）＋0.0128×65（kg）－0.1529
 % phi;q;A;
 Tc=40;Th=55;Tm=36.5;
 Tf1=Tc; Tf2=25;
 % Tw1;Tw2; 
 h1=200; % 水->陶瓷
 h2=3; % 陶瓷->空气
+% [h1,h2]=meshgrid(200:800/100:1000,3:7/100:10);
 h3=h1; % 水->空气
 Lambda1=1.3; % 陶瓷
-Lambda2=0.63; % 水
+Lambda2=0.635; % 水
+Lambda3=0.0263;%空气
 C=4200;
 rho=1000;
-%% Const Define model_improve_1
+% S1;
 rhom=1020;%人体密度
 Lm=1.7;%人的身高
 Mm=70;%人的质量
 rm=(Mm/rhom/Lm/pi)^(0.5);%假想人体近似于一个圆柱体，则这个圆柱体的底面半径
 Hm= 0.2;%人在水里的深度
-
-%% (要对h1，h2，h3进行确定)
-
-%% Compute 1（水中有人，phi3中考虑了人的具体形状）
+%% Compute 1（单一水池，无人，假设外加热水加入立刻混合均匀）
 % % 陶瓷面面积
 A1=2*a*c+a*b+2*b*c;
 % % 空气面面积
 A2=a*b;
 % % 热流量
+% phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tm)
+% phi2=h3*A2*(Tf1-Tf2);
+% phi=phi1+phi2;
+% % dQH==phi;
+% S1=phi./(C*rho*(Th-Tf1));
+% S1*1000;
+% % mesh(h1,h2,S1*1000);
+
+%% Compute 2（水池中加入人）
+% 假定人是一个等温体，与水发生对流换热
 phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tf2);
 phi2=h3*A2*(Tf1-Tf2);
 phi3=2*pi*Lm*Lambda2/(log(Hm/rm+sqrt((Hm/rm)^2-1)))*(Tf1-Tm);
 phi=phi1+phi2+phi3;
 % dQH==phi;
-S2=phi./(C*rho*(Th-Tf1));
-S2*1000;
+S2=phi./(C*rho*(Th-Tf1))
+S2*1000
 % mesh(h1,h2,S2*1000);
 %% Compute 3（讨论在此模型下tub/person的shape/volume/temperature对模型的影响）
 % 计算两种散热面的热流密度
@@ -84,7 +89,7 @@ phi=phi1+phi2;
 % dQH==phi;
 S1=phi./(C*rho*(Th-Tf1));
 S1*1000;
-phi3=2*pi*Lm*Lambda2/(log(Hm/rm-sqrt((Hm/rm)^2-1)))*(Tf1-Tm)*ones(1,8001);
+phi3=2*pi*Lm*Lambda2/(log(Hm/rm+sqrt((Hm/rm)^2-1)))*(Tf1-Tm)*ones(1,8001);
 phi=phi1+phi2+phi3;
 % dQH==phi;
 S2=phi./(C*rho*(Th-Tf1));
@@ -109,18 +114,30 @@ S2*1000;
 % Sm=phi./(C*rho*(Th-Tf1));
 % mesh(Lm,Mm,Sm*1000);
 % %对于体重在50kg-90kg，身高1.5m-1.9m之间的人而言，热流量φ会随着身高体重的增加而增加，呈现一种线性变化的趋势。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%% compute6 自然对流对对流传导系数h的修正
+%首先确定各边界上流体的运动形态
+%空气对陶瓷的热对流为自然对流
+%上表面水对空气的对流是自然对流
+%浴缸壁上水的对流方式由雷诺数Re和格拉晓夫数的大小来确定
+vicw=0.659;
+vica=15.53;%水和空气的动力粘性系数
+g=9.8;%重力加速度
+alfaw=3.86;
+alfaa=27.23;%水和空气的热膨胀率
+Grw=g*alfaw*(Tf1-Tf2)*c/(vicw^2);
+Gra=g*alfaa*(Tf1-Tf2)*c/(vica^2);
+Rewmax=(Grw/10)^0.5;
+vwmax=Rewmax*c/vicw;%可见使强迫对流效应忽略不计是最大的流速为4.38m/s，远大于实际情况，因此水对浴缸壁的流体形式为自然对流
+%同时由于Re数很小，远小于临界Re数，所有的流体中不存在湍流
+Prw=4.31;
+Pra=0.702;%普拉特数
+%自然对流下系数的计算
+h1=((0.6^5)*(Lambda2*100)^4*g*alfaw*(Tf1-Tf2)*Prw/c/vicw^2)^(0.25);
+h2=((0.6^5)*(Lambda3*100)^4*g*alfaa*(Tf1-Tf2)*Pra/c/vica^2)^(0.25);
+h3=h1;
+phi1=1./(1./h1+delta./Lambda1+1./h2)*A1*(Tf1-Tf2);
+phi2=h3*A2*(Tf1-Tf2);
+phi3=2*pi*Lm*Lambda2/(log(Hm/rm+sqrt((Hm/rm)^2-1)))*(Tf1-Tm);
+phi=phi1+phi2+phi3;
+S2=phi./(C*rho*(Th-Tf1));
+S2*1000
